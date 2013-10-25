@@ -4,17 +4,17 @@ class LFSR
   attr_accessor :polynom_indexes
   
   def initialize(polynom_indexes) # [0, 0, 1, 1] => 1 + x**3 + x**4
-	  @polynom_indexes = polynom_indexes
-	  @triggers = [1] + [0] * (polynom_indexes.size - 1)
+    @polynom_indexes = polynom_indexes
+    @triggers = [1] + [0] * (polynom_indexes.size - 1)
   end
   
   def run_once
     prev_state = @triggers
     @triggers = @triggers.rotate(-1)
-	  @triggers[0] = prev_state
-	    .zip(@polynom_indexes)
-	    .map { |a, b| a & b }
-	    .reduce(:^)
+    @triggers[0] = prev_state
+      .zip(@polynom_indexes)
+      .map { |a, b| a & b }
+      .reduce(:^)
     triggers
   end
   
@@ -110,33 +110,33 @@ class CoverageTableBuilder
 
   def build
     sets = Hash.new { |hash, key| hash[key] = [] }
-		nodes = [*1..7].map { |i| "x#{i}" } + [*1..6].map { |i| "f#{i}" }
-		nodes.each do |node|
-		  [0, 1].each do |fault|
-		    [0, 1].repeated_permutation(7).each do |xs|
-		      test = @scheme.run(xs, node, fault)
-		      correct = @scheme.run(xs)
-		      sets[xs] << { fault => node } if test != correct
-		    end
-		  end
-		end
-		sets
+    nodes = [*1..7].map { |i| "x#{i}" } + [*1..6].map { |i| "f#{i}" }
+    nodes.each do |node|
+      [0, 1].each do |fault|
+        [0, 1].repeated_permutation(7).each do |xs|
+          test = @scheme.run(xs, node, fault)
+          correct = @scheme.run(xs)
+          sets[xs] << { fault => node } if test != correct
+        end
+      end
+    end
+    sets
   end
 end
 
 class SignatureAnalyzer
   def initialize(params)
-		@polynom_indexes = params[:polynom_indexes]
-  	@triggers = [0] * @polynom_indexes.size
+    @polynom_indexes = params[:polynom_indexes]
+    @triggers = [0] * @polynom_indexes.size
   end
 
   def run(input)
-  	fail "Input must be an array" unless input.is_a? Array
+    fail "Input must be an array" unless input.is_a? Array
     [@triggers.dup] + input.map { |x| run_once(x) }
   end
 
   def run_once(x)
-  	fail "Input must be 0 or 1" unless (0..1).include? x
+    fail "Input must be 0 or 1" unless (0..1).include? x
     @triggers.rotate!
     @triggers[-1] = @triggers
       .zip(@polynom_indexes)
